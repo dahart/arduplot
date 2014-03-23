@@ -1,0 +1,28 @@
+
+Ardu plot - plot your arduino (or any serial) telemetry
+
+This program takes ASCII-encoded strings from the serial port and plots them.
+
+Format:
+
+lines should begin with a 1 character command, followed by tab-delimited data
+
+commands:
+
+"n": names. tab-delimited strings, in column order, e.g.:
+     all names must be on one line
+     note: re-send any range & pair data every time names are sent
+     "n   time   rate   bx   by"        ('n\tax\tay\tbx\tby')
+"r": set range.  tab-delimited triplets: name min max
+     include only the columns to be set to limited range
+     all columns not set will be auto-ranged
+     multiple column ranges can be listed on the same line
+     or with separate "r" commands on separate lines
+     "r   bx   -5   5   by   -5   5"
+"p": 2d pairs.  tab-delimited pairs of x/y names to bind for 2-d plots.
+     multiple pairs can be listed on the same line
+     or with separate "p" commands on separate lines
+     "p   bx   by"
+"d": data.  tab-delimited numbers, in column order.  floating point or integer.
+     all column data must be on one line
+     "d   1   2.5   3.6319982   0"
