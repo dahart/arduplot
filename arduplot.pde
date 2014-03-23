@@ -154,16 +154,11 @@ void setup () {
 
 
 //----------------------------------------------------------------------
-void draw () {
-  
+void draw () {  
   // new data happens in the serialEvent()
 
   background(0);
-  // fill(255);
-  // rect(mouseX,mouseY,50,50);
-
   graph.draw();
-
 }
 
 
@@ -197,12 +192,6 @@ void serialEvent (Serial myPort) {
     case 'n':
       graph.parseNames(stringData);
       break;
-    // case 'r':
-    //   parseRanges(stringData);
-    //   break;
-    // case 'p':
-    //   parsePairs(stringData);
-    //   break;
     case 'd':
       graph.parseData(stringData);
       break;
@@ -213,23 +202,3 @@ void serialEvent (Serial myPort) {
   
   redraw();
 }
-
-
-//----------------------------------------------------------------------
-// void keyPressed() {
-//   int keyIndex = -1;
-//   if (key >= 'A' && key <= 'Z') {
-//     keyIndex = key - 'A';
-//   } else if (key >= 'a' && key <= 'z') {
-//     keyIndex = key - 'a';
-//   }
-//   if (keyIndex == -1) {
-//     // If it's not a letter key, clear the screen
-//     background(0);
-//   } else { 
-//     // It's a letter key, fill a rectangle
-//     fill(millis() % 255);
-//     float x = map(keyIndex, 0, 25, 0, width - rectWidth);
-//     rect(x, 0, rectWidth, height);
-//   }
-// }
