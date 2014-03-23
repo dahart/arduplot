@@ -78,9 +78,10 @@ public class Graph {
 
     for (int column = 0; column < columns.length; column++) {
       Column c = columns[column];
-      for (int i = 1; i < width; i++) {
-        c.data[i-1] = c.data[i];
-      }
+      
+      // shift data over by one, make room for a new datum
+      System.arraycopy(c.data, 1, c.data, 0, width-1);
+
       float n = Float.parseFloat(stringData[column]);
       c.data[width-1] = n;
       if (c.doAutoRange) {
