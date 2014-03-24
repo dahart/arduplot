@@ -32,7 +32,6 @@ commands:
 import processing.serial.*;
 
 Serial myPort = null;        // The serial port
-int xPos = 1;         // horizontal position of the graph
 
 //----------------------------------------------------------------------
 public class Column {
@@ -125,6 +124,7 @@ public class Graph {
           } catch (Exception e) {
           }
           rangeSet = true;
+          columns[c].doAutoRange = false;
           println(String.format("range: set '%s' to %s..%s", ranges[i], ranges[i+1], ranges[i+2]));
           break;
         }
