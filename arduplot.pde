@@ -39,11 +39,10 @@ public class Column {
   float x0, x1, y0, y1;
   boolean doAutoRange;
 
-  public Column(String iname) {
-    name = iname;
+  public Column() {
+    name = "";
 
     data = new float[width];
-    for (int i = 0; i < width; i++) data[i] = 0.0;
 
     x0 = 0;
     x1 = width;
@@ -64,18 +63,30 @@ public class Graph {
   }
 
   //----------------------------------------
+  // reset number of columns to n
+  void resetColumns(int n) {
+    columns = new Column[n];
+    for (int i = 0; i < n; i++) {
+      columns[i] = new Column();
+    }
+  }
+  
+  //----------------------------------------
   void parseNames(String[] names) {
     if (names.length != columns.length) {
-      columns = new Column[names.length];
-      for (int i = 0; i < names.length; i++) {
-        columns[i] = new Column(names[i]);
-      }
+      resetColumns(names.length);
+    }
+    
+    for (int i = 0; i < names.length; i++) {
+      columns[i].name = names[i];
     }
   }
 
   //----------------------------------------
   void parseData(String[] stringData) {
-    if (stringData.length != columns.length) return;
+    if (stringData.length != columns.length) {
+      resetColumns(stringData.length);
+    }
 
     for (int column = 0; column < columns.length; column++) {
       Column c = columns[column];
@@ -95,23 +106,28 @@ public class Graph {
   //----------------------------------------
   void draw() {
     stroke(255);
+    noSmooth();
 
     if (columns.length < 1) return;
     
-    print(String.format("height: %d", height));
-    print(String.format("N: %d", columns.length));
     float dY = height / columns.length;
-    print(String.format("dY: %f", dY));
+    float px, py;
+    float nx, ny;
 
-    for (int column = 0; column < columns.length; column++) {
+    for (int column = 0; column < columns.length; column++) 
+    {
       Column c = columns[column];
+      float dY0 = dY*column;
+      float dY1 = dY*(column+1);
+      px = 0;
+      py = map(c.data[0], c.y0, c.y1, dY0, dY1);
       for (int i = 1; i < width; i++)
       {
-        float x0 = i-1;
-        float x1 = i;
-        float y0 = map(c.data[i-1], c.y0, c.y1, dY*column, dY*(column+1));
-        float y1 = map(c.data[i  ], c.y0, c.y1, dY*column, dY*(column+1));
-        line(x0, y0, x1, y1);
+        nx = i;
+        ny = map(c.data[i], c.y0, c.y1, dY0, dY1);
+        line(px, py, nx, ny);
+        px = nx;
+        py = ny;
       }
     }
   }
