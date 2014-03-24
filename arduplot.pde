@@ -8,23 +8,25 @@ Format:
 lines should begin with a 1 character command, followed by tab-delimited data
 
 commands:
-"n": names. tab-delimited strings, in column order, e.g.:
+"d": data.  tab-delimited numbers, in column order.  floating point or integer.
+     all column data must be on one line
+     "d   1   2.5   3.6319982   0"
+"n": names. (optional) tab-delimited strings, in column order, e.g.:
      all names must be on one line
      note: re-send any range & pair data every time names are sent
      "n   time   rate   bx   by"        ('n\tax\tay\tbx\tby')
-"r": set range.  tab-delimited triplets: name min max
+"r": set range.  (optional) tab-delimited triplets: name min max
+     requires columns to be named
      include only the columns to be set to limited range
      all columns not set will be auto-ranged
      multiple column ranges can be listed on the same line
      or with separate "r" commands on separate lines
      "r   bx   -5   5   by   -5   5"
 "p": 2d pairs.  tab-delimited pairs of x/y names to bind for 2-d plots.
+     requires columns to be named
      multiple pairs can be listed on the same line
      or with separate "p" commands on separate lines
      "p   bx   by"
-"d": data.  tab-delimited numbers, in column order.  floating point or integer.
-     all column data must be on one line
-     "d   1   2.5   3.6319982   0"
 */
 
 import processing.serial.*;
@@ -94,11 +96,41 @@ public class Graph {
       // shift data over by one, make room for a new datum
       System.arraycopy(c.data, 1, c.data, 0, width-1);
 
-      float n = Float.parseFloat(stringData[column]);
+      float n = 0;
+      try {
+        n = Float.parseFloat(stringData[column]);
+      } catch (Exception e) {
+      }
       c.data[width-1] = n;
       if (c.doAutoRange) {
         if (n < c.y0) c.y0 = n;
         if (n > c.y1) c.y1 = n;
+      }
+    }
+  }
+  
+  //----------------------------------------
+  void parseRange(String[] ranges) {
+    if ((ranges.length % 3) != 0) {
+      println("RANGE: bad format");
+      return;
+    }
+    for (int i = 0; i < ranges.length; i += 3) {
+      boolean rangeSet = false;
+      for (int c = 0; c < columns.length; c++) {
+        if (ranges[i].equals(columns[c].name)) {
+          try {
+            columns[c].y0 = Float.parseFloat(ranges[i+1]);
+            columns[c].y1 = Float.parseFloat(ranges[i+2]);
+          } catch (Exception e) {
+          }
+          rangeSet = true;
+          println(String.format("range: set '%s' to %s..%s", ranges[i], ranges[i+1], ranges[i+2]));
+          break;
+        }
+      }
+      if (!rangeSet) {
+        println(String.format("range: couldn't find a column named '%s'", ranges[i]));
       }
     }
   }
@@ -193,20 +225,20 @@ void draw () {
 //----------------------------------------------------------------------
 void serialEvent (Serial myPort) {
   // get the ASCII string:
-  String inString = "";
+  String inString;
   try {
     inString = myPort.readStringUntil('\n');
+    if (inString == null) return;
   } catch (Exception e) {
     // do nothing on error
     return;
   }
 
-  if (inString == null) return;
-  
   // trim whitespace:
   inString = trim(inString);
   
   // split on tabs
+  if (!inString.contains("\t")) return;
   String[] tokens = inString.split("\t");
   if (tokens.length < 1) return;
 
@@ -219,9 +251,13 @@ void serialEvent (Serial myPort) {
   switch(cmd) {
     case 'n':
       graph.parseNames(stringData);
+      println(String.format("Got NAMES: %s", inString));
       break;
     case 'd':
       graph.parseData(stringData);
+      break;
+    case 'r':
+      graph.parseRange(stringData);
       break;
     default:
       println(String.format("unknown command %s", tokens[0]));
