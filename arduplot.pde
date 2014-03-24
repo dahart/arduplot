@@ -105,7 +105,6 @@ public class Graph {
 
   //----------------------------------------
   void draw() {
-    stroke(255);
     noSmooth();
 
     if (columns.length < 1) return;
@@ -119,6 +118,17 @@ public class Graph {
       Column c = columns[column];
       float dY0 = dY*column;
       float dY1 = dY*(column+1);
+      
+      // draw some background blocks to distinguish columns
+      if (column % 2 == 1) {
+        fill(255,255,255,16);
+        noStroke();
+        rect(0, dY0, width, dY);
+      }
+
+      // plot the data
+      stroke(255);
+      noFill();
       px = 0;
       py = map(c.data[0], c.y0, c.y1, dY0, dY1);
       for (int i = 1; i < width; i++)
