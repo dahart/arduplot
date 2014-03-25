@@ -1,8 +1,6 @@
 /*
 Ardu plot - plot arduino (serial) telemetry.
-
-This program takes ASCII-encoded strings from the serial port,
-and plots them using Processing.
+This processing sketch plots ASCII-encoded data from the serial port.
 
 Format:
 lines should begin with a 1 character command, followed by tab-delimited data
@@ -138,6 +136,7 @@ public class Graph {
   //----------------------------------------
   void draw() {
     noSmooth();
+    textAlign(LEFT);
 
     if (columns.length < 1) return;
     
@@ -153,10 +152,14 @@ public class Graph {
       
       // draw some background blocks to distinguish columns
       if (column % 2 == 1) {
-        fill(255,255,255,16);
+        fill(255,255,255,32);
         noStroke();
         rect(0, dY0, width, dY);
       }
+      
+      // display the column name
+      fill(200);
+      text(c.name, 10, dY1);
 
       // plot the data
       stroke(255);

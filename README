@@ -1,7 +1,5 @@
 Ardu plot - plot arduino (serial) telemetry.
-
-This program takes ASCII-encoded strings from the serial port,
-and plots them using Processing.
+This processing sketch plots ASCII-encoded data from the serial port.
 
 Format:
 lines should begin with a 1 character command, followed by tab-delimited data
