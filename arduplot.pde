@@ -5,7 +5,7 @@ This processing sketch plots ASCII-encoded data from the serial port.
 Format:
 lines should begin with a 1 character command, followed by tab-delimited data
 
-commands:
+serial commands:
 "d": data.  tab-delimited numbers, in column order.  floating point or integer.
      all column data must be on one line
      "d   1   2.5   3.6319982   0"
@@ -25,6 +25,15 @@ commands:
      multiple pairs can be listed on the same line
      or with separate "p" commands on separate lines
      "p   bx   by"
+     
+     
+keyboard commands:
+"r": print ranges.
+ESC: quit.
+
+
+TODO:
+- add port/baud selection on startup
 */
 
 import processing.serial.*;
@@ -134,6 +143,14 @@ public class Graph {
   }
 
   //----------------------------------------
+  void printRange() {
+    for (int c = 0; c < columns.length; c++) {
+      println(String.format("range for column  %d (\"%s\"): %f..%f",
+        c, columns[c].name, columns[c].y0, columns[c].y1));
+    }
+  }
+  
+  //----------------------------------------
   void draw() {
     noSmooth();
     textAlign(LEFT);
@@ -187,13 +204,12 @@ void setup () {
 
   // List all the available serial ports
   println(Serial.list());
-  // I know that the first port in the serial list on my mac
-  // is always my  Arduino, so I open Serial.list()[0].
-  // Open whatever port is the one you're using.
-  
+    
   for (String port : Serial.list())
   {
     println(port);
+    // auto-connect to the usb "serial" port
+    // (I'm assuming there's only one -- TODO: make this a choice) 
     if (port.toLowerCase().contains("tty.usbmodem"))
     {
       print("Got it!\n");
@@ -222,6 +238,13 @@ void draw () {
 
   background(0);
   graph.draw();
+}
+
+//----------------------------------------------------------------------
+void keyPressed() {
+  if (key == 'r' || key == 'R') {
+    graph.printRange();
+  }
 }
 
 

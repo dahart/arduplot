@@ -4,7 +4,7 @@ This processing sketch plots ASCII-encoded data from the serial port.
 Format:
 lines should begin with a 1 character command, followed by tab-delimited data
 
-commands:
+serial commands:
 "d": data.  tab-delimited numbers, in column order.  floating point or integer.
      all column data must be on one line
      "d   1   2.5   3.6319982   0"
@@ -24,3 +24,12 @@ commands:
      multiple pairs can be listed on the same line
      or with separate "p" commands on separate lines
      "p   bx   by"
+     
+     
+keyboard commands:
+"r": print ranges.
+ESC: quit.
+
+
+TODO:
+- add port/baud selection on startup
