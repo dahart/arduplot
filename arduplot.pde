@@ -29,11 +29,12 @@ serial commands:
      
 keyboard commands:
 "r": print ranges.
+"p": toggle pairs.
 ESC: quit.
 
 
 TODO:
-- add port/baud selection on startup
+- add port/baud selection UI on startup, that would be rad
 */
 
 import processing.serial.*;
@@ -42,6 +43,7 @@ Serial myPort = null;        // The serial port
 
 //----------------------------------------------------------------------
 public class Column {
+  
   String name;
   float[] data;
   float x0, x1, y0, y1;
@@ -64,10 +66,14 @@ public class Column {
 //----------------------------------------------------------------------
 public class Graph {
   Column[] columns;
+  ArrayList<Integer> pairs;
+  boolean drawPairs;
 
   //----------------------------------------
   public Graph() {
     columns = new Column[0];
+    pairs   = new ArrayList<Integer>();
+    drawPairs = true;
   }
 
   //----------------------------------------
@@ -77,13 +83,13 @@ public class Graph {
     for (int i = 0; i < n; i++) {
       columns[i] = new Column();
     }
+
+    pairs.clear();
   }
   
   //----------------------------------------
   void parseNames(String[] names) {
-    if (names.length != columns.length) {
-      resetColumns(names.length);
-    }
+    resetColumns(names.length);
     
     for (int i = 0; i < names.length; i++) {
       columns[i].name = names[i];
@@ -106,6 +112,7 @@ public class Graph {
       try {
         n = Float.parseFloat(stringData[column]);
       } catch (Exception e) {
+        // exceptions in parseFloat() lead to Serial failure
       }
       c.data[width-1] = n;
       if (c.doAutoRange) {
@@ -116,7 +123,7 @@ public class Graph {
   }
   
   //----------------------------------------
-  void parseRange(String[] ranges) {
+  void parseRanges(String[] ranges) {
     if ((ranges.length % 3) != 0) {
       println("RANGE: bad format");
       return;
@@ -129,6 +136,7 @@ public class Graph {
             columns[c].y0 = Float.parseFloat(ranges[i+1]);
             columns[c].y1 = Float.parseFloat(ranges[i+2]);
           } catch (Exception e) {
+            // exceptions in parseFloat() lead to Serial failure
           }
           rangeSet = true;
           columns[c].doAutoRange = false;
@@ -138,6 +146,38 @@ public class Graph {
       }
       if (!rangeSet) {
         println(String.format("range: couldn't find a column named '%s'", ranges[i]));
+      }
+    }
+  }
+
+  //----------------------------------------
+  void parsePairs(String[] i_pairs) {
+    if ((i_pairs.length % 2) != 0) {
+      println("PAIRS: bad format");
+      return;
+    }
+    
+    int p0 = -1;
+    int p1 = -1;
+    
+    for (int i = 0; i < i_pairs.length; i += 2) {
+      boolean pairSet = false;
+      
+      for (int c = 0; c < columns.length; c++) {
+        if (i_pairs[i  ].equals(columns[c].name)) p0 = c;
+        if (i_pairs[i+1].equals(columns[c].name)) p1 = c;
+      }
+              
+      if (p0 >= 0 && p1 >= 0) {
+        pairSet = true;
+        pairs.add(p0);
+        pairs.add(p1);
+        println(String.format("pair (2d): %s and %s", i_pairs[i], i_pairs[i+1]));
+      }
+
+      if (!pairSet) {
+        println(String.format("pair (2d): couldn't find a sequential pair '%s, %s'", 
+          i_pairs[i], i_pairs[i+1]));
       }
     }
   }
@@ -175,7 +215,7 @@ public class Graph {
       }
       
       // display the column name
-      fill(200);
+      fill(32, 220, 32);
       text(c.name, 10, dY1);
 
       // plot the data
@@ -192,6 +232,36 @@ public class Graph {
         py = ny;
       }
     }
+    
+    // draw pairs
+    if (drawPairs) {
+      float pdY = 2 * dY; // how big to make our 2d pair boxes
+      // where to draw our 2d pair boxes
+      float pY = 10;
+      float pX = 100;
+
+      for (int pi = 0; pi < pairs.size(); pi+=2, pY += pdY + dY/2) {
+        Column c0 = columns[pairs.get(pi).intValue()];
+        Column c1 = columns[pairs.get(pi+1).intValue()];
+        
+        float x = pX + map(c0.data[width-1], c0.y0, c0.y1, 0, pdY);
+        float y = pY + map(c1.data[width-1], c1.y0, c1.y1, 0, pdY);
+
+
+        stroke(64, 64, 64, 255);
+        fill(0, 0, 0, 128+64);
+        rect(pX, pY, pdY, pdY);
+
+        noStroke();
+        ellipseMode(CENTER);
+        fill(230, 128, 32);
+        ellipse(x, y, 6, 6);
+        
+        // display the pair name
+        text(String.format("%s v %s", c0.name, c1.name), pX + 10, pY + 10);
+      }
+    }
+
   }
 }
 
@@ -242,8 +312,14 @@ void draw () {
 
 //----------------------------------------------------------------------
 void keyPressed() {
-  if (key == 'r' || key == 'R') {
-    graph.printRange();
+  switch(key) {
+    case 'r':
+      graph.printRange();
+      break;
+      
+    case 'p':
+      graph.drawPairs = !graph.drawPairs;
+      break;
   }
 }
 
@@ -283,7 +359,10 @@ void serialEvent (Serial myPort) {
       graph.parseData(stringData);
       break;
     case 'r':
-      graph.parseRange(stringData);
+      graph.parseRanges(stringData);
+      break;
+    case 'p':
+      graph.parsePairs(stringData);
       break;
     default:
       println(String.format("unknown command %s", tokens[0]));
