@@ -28,8 +28,11 @@ serial commands:
      
 keyboard commands:
 "r": print ranges.
+"p": toggle pairs.
+"n": toggle names.
+"b": toggle background bars.
 ESC: quit.
 
 
 TODO:
-- add port/baud selection on startup
+- add port/baud selection UI on startup, that would be rad
