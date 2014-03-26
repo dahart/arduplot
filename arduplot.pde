@@ -30,6 +30,8 @@ serial commands:
 keyboard commands:
 "r": print ranges.
 "p": toggle pairs.
+"n": toggle names.
+"b": toggle background bars.
 ESC: quit.
 
 
@@ -68,12 +70,16 @@ public class Graph {
   Column[] columns;
   ArrayList<Integer> pairs;
   boolean drawPairs;
+  boolean drawNames;
+  boolean drawBGBars;
 
   //----------------------------------------
   public Graph() {
     columns = new Column[0];
     pairs   = new ArrayList<Integer>();
     drawPairs = true;
+    drawNames = true;
+    drawBGBars = true;
   }
 
   //----------------------------------------
@@ -207,15 +213,17 @@ public class Graph {
       float dY1 = dY*(ci+1);
       
       // draw some background blocks to distinguish columns
-      if (ci % 2 == 1) {
+      if (drawBGBars && ((ci % 2) == 1)) {
         fill(255,255,255,32);
         noStroke();
         rect(0, dY0, width, dY);
       }
       
       // display the column name
-      fill(32, 220, 32);
-      text(c.name, 10, dY1-10);
+      if (drawNames) {
+        fill(32, 220, 32);
+        text(c.name, 10, dY1-10);
+      }
 
       // plot the data
       stroke(255);
@@ -259,7 +267,9 @@ public class Graph {
         fill(230, 128, 32);
         ellipse(x, y, 6, 6);
         
-        text(String.format("%s v %s", c0.name, c1.name), pX + 10, pY + 10);
+        if (drawNames) {
+          text(String.format("%s v %s", c0.name, c1.name), pX + 10, pY + 10);
+        }
       }
     }
 
@@ -318,6 +328,14 @@ void keyPressed() {
       
     case 'p':
       graph.drawPairs = !graph.drawPairs;
+      break;
+      
+    case 'n':
+      graph.drawNames = !graph.drawNames;
+      break;
+      
+    case 'b':
+      graph.drawBGBars = !graph.drawBGBars;
       break;
   }
 }
