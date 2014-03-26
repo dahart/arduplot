@@ -88,29 +88,29 @@ public class Graph {
   }
   
   //----------------------------------------
-  void parseNames(String[] names) {
-    resetColumns(names.length);
+  void parseNames(String[] strData) {
+    resetColumns(strData.length);
     
-    for (int i = 0; i < names.length; i++) {
-      columns[i].name = names[i];
+    for (int i = 0; i < strData.length; i++) {
+      columns[i].name = strData[i];
     }
   }
 
   //----------------------------------------
-  void parseData(String[] stringData) {
-    if (stringData.length != columns.length) {
-      resetColumns(stringData.length);
+  void parseData(String[] strData) {
+    if (strData.length != columns.length) {
+      resetColumns(strData.length);
     }
 
-    for (int column = 0; column < columns.length; column++) {
-      Column c = columns[column];
+    for (int ci = 0; ci < columns.length; ci++) {
+      Column c = columns[ci];
       
       // shift data over by one, make room for a new datum
       System.arraycopy(c.data, 1, c.data, 0, width-1);
 
       float n = 0;
       try {
-        n = Float.parseFloat(stringData[column]);
+        n = Float.parseFloat(strData[ci]);
       } catch (Exception e) {
         // exceptions in parseFloat() lead to Serial failure
       }
@@ -123,36 +123,36 @@ public class Graph {
   }
   
   //----------------------------------------
-  void parseRanges(String[] ranges) {
-    if ((ranges.length % 3) != 0) {
+  void parseRanges(String[] strData) {
+    if ((strData.length % 3) != 0) {
       println("RANGE: bad format");
       return;
     }
-    for (int i = 0; i < ranges.length; i += 3) {
+    for (int i = 0; i < strData.length; i += 3) {
       boolean rangeSet = false;
-      for (int c = 0; c < columns.length; c++) {
-        if (ranges[i].equals(columns[c].name)) {
+      for (int ci = 0; ci < columns.length; ci++) {
+        if (strData[i].equals(columns[ci].name)) {
           try {
-            columns[c].y0 = Float.parseFloat(ranges[i+1]);
-            columns[c].y1 = Float.parseFloat(ranges[i+2]);
+            columns[ci].y0 = Float.parseFloat(strData[i+1]);
+            columns[ci].y1 = Float.parseFloat(strData[i+2]);
           } catch (Exception e) {
             // exceptions in parseFloat() lead to Serial failure
           }
           rangeSet = true;
-          columns[c].doAutoRange = false;
-          println(String.format("range: set '%s' to %s..%s", ranges[i], ranges[i+1], ranges[i+2]));
+          columns[ci].doAutoRange = false;
+          println(String.format("range: set '%s' to %s..%s", strData[i], strData[i+1], strData[i+2]));
           break;
         }
       }
       if (!rangeSet) {
-        println(String.format("range: couldn't find a column named '%s'", ranges[i]));
+        println(String.format("range: couldn't find a column named '%s'", strData[i]));
       }
     }
   }
 
   //----------------------------------------
-  void parsePairs(String[] i_pairs) {
-    if ((i_pairs.length % 2) != 0) {
+  void parsePairs(String[] strData) {
+    if ((strData.length % 2) != 0) {
       println("PAIRS: bad format");
       return;
     }
@@ -160,33 +160,33 @@ public class Graph {
     int p0 = -1;
     int p1 = -1;
     
-    for (int i = 0; i < i_pairs.length; i += 2) {
+    for (int i = 0; i < strData.length; i += 2) {
       boolean pairSet = false;
       
       for (int c = 0; c < columns.length; c++) {
-        if (i_pairs[i  ].equals(columns[c].name)) p0 = c;
-        if (i_pairs[i+1].equals(columns[c].name)) p1 = c;
+        if (strData[i  ].equals(columns[c].name)) p0 = c;
+        if (strData[i+1].equals(columns[c].name)) p1 = c;
       }
               
       if (p0 >= 0 && p1 >= 0) {
         pairSet = true;
         pairs.add(p0);
         pairs.add(p1);
-        println(String.format("pair (2d): %s and %s", i_pairs[i], i_pairs[i+1]));
+        println(String.format("pair (2d): %s and %s", strData[i], strData[i+1]));
       }
 
       if (!pairSet) {
         println(String.format("pair (2d): couldn't find a sequential pair '%s, %s'", 
-          i_pairs[i], i_pairs[i+1]));
+          strData[i], strData[i+1]));
       }
     }
   }
 
   //----------------------------------------
   void printRange() {
-    for (int c = 0; c < columns.length; c++) {
+    for (int ci = 0; ci < columns.length; ci++) {
       println(String.format("range for column  %d (\"%s\"): %f..%f",
-        c, columns[c].name, columns[c].y0, columns[c].y1));
+        ci, columns[ci].name, columns[ci].y0, columns[ci].y1));
     }
   }
   
@@ -201,14 +201,13 @@ public class Graph {
     float px, py;
     float nx, ny;
 
-    for (int column = 0; column < columns.length; column++) 
-    {
-      Column c = columns[column];
-      float dY0 = dY*column;
-      float dY1 = dY*(column+1);
+    for (int ci = 0; ci < columns.length; ci++) {
+      Column c = columns[ci];
+      float dY0 = dY*ci;
+      float dY1 = dY*(ci+1);
       
       // draw some background blocks to distinguish columns
-      if (column % 2 == 1) {
+      if (ci % 2 == 1) {
         fill(255,255,255,32);
         noStroke();
         rect(0, dY0, width, dY);
@@ -216,15 +215,14 @@ public class Graph {
       
       // display the column name
       fill(32, 220, 32);
-      text(c.name, 10, dY1);
+      text(c.name, 10, dY1-10);
 
       // plot the data
       stroke(255);
       noFill();
       px = 0;
       py = map(c.data[0], c.y0, c.y1, dY0, dY1);
-      for (int i = 1; i < width; i++)
-      {
+      for (int i = 1; i < width; i++) {
         nx = i;
         ny = map(c.data[i], c.y0, c.y1, dY0, dY1);
         line(px, py, nx, ny);
@@ -252,7 +250,6 @@ public class Graph {
         float x = pX + map(c0.data[width-1], c0.y0, c0.y1, 0, pdY);
         float y = pY + map(c1.data[width-1], c1.y0, c1.y1, 0, pdY);
 
-
         stroke(64, 64, 64, 255);
         fill(0, 0, 0, 128+64);
         rect(pX, pY, pdY, pdY);
@@ -262,7 +259,6 @@ public class Graph {
         fill(230, 128, 32);
         ellipse(x, y, 6, 6);
         
-        // display the pair name
         text(String.format("%s v %s", c0.name, c1.name), pX + 10, pY + 10);
       }
     }
@@ -280,13 +276,11 @@ void setup () {
   // List all the available serial ports
   println(Serial.list());
     
-  for (String port : Serial.list())
-  {
+  for (String port : Serial.list()) {
     println(port);
     // auto-connect to the usb "serial" port
     // (I'm assuming there's only one -- TODO: make this a choice) 
-    if (port.toLowerCase().contains("tty.usbmodem"))
-    {
+    if (port.toLowerCase().contains("tty.usbmodem")) {
       print("Got it!\n");
       myPort = new Serial(this, port, 115200);
       break;
