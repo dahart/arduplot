@@ -234,13 +234,18 @@ public class Graph {
     }
     
     // draw pairs
-    if (drawPairs) {
-      float pdY = 2 * dY; // how big to make our 2d pair boxes
-      // where to draw our 2d pair boxes
-      float pY = 10;
+    if (drawPairs && pairs.size() > 0) {
+      int nPairs = pairs.size() / 2;
+
+      // how big to make our 2d pair boxes
+      float pdY = min(height / nPairs, 2 * dY);
+      float space = (height - (nPairs * pdY)) / nPairs;
+
+      // where to draw our 2d pair boxes.  distribute extra space evenly
+      float pY = space/2;
       float pX = 100;
 
-      for (int pi = 0; pi < pairs.size(); pi+=2, pY += pdY + dY/2) {
+      for (int pi = 0; pi < pairs.size(); pi+=2, pY += pdY + space) {
         Column c0 = columns[pairs.get(pi).intValue()];
         Column c1 = columns[pairs.get(pi+1).intValue()];
         
