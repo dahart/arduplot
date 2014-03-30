@@ -1,3 +1,5 @@
+![](https://dl.dropboxusercontent.com/u/364079/arduplot-screenshot.png)
+
 Ardu plot - plot arduino (serial) telemetry.
 This processing sketch plots ASCII-encoded data from the serial port.
 
