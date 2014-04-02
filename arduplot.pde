@@ -15,7 +15,7 @@ serial commands:
      example: "n time rate bx by"
 "r": set range.  (optional) name min max
      requires columns to be named
-     include only the columns to be set to limited range
+     include only the columns to be set to fixed range
      all data not set to a fixed range with this command will be auto-ranged
      multiple column ranges can be listed on the same line
      or with separate "r" commands on separate lines
