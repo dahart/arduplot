@@ -3,28 +3,28 @@ Ardu plot - plot arduino (serial) telemetry.
 This processing sketch plots ASCII-encoded data from the serial port.
 
 Format:
-lines should begin with a 1 character command, followed by tab-delimited data
+lines should begin with a 1 character command, followed by whitespace-delimited data
 
 serial commands:
-"d": data.  tab-delimited numbers, in column order.  floating point or integer.
-     all column data must be on one line
-     "d   1   2.5   3.6319982   0"
-"n": names. (optional) tab-delimited strings, in column order, e.g.:
+"d": data - float or int
+     all data must be on one line
+     example: "d 1 2.5 3.6319982 0"
+"n": names. (optional) 
      all names must be on one line
      note: re-send any range & pair data every time names are sent
-     "n   time   rate   bx   by"        ('n\tax\tay\tbx\tby')
-"r": set range.  (optional) tab-delimited triplets: name min max
+     example: "n time rate bx by"
+"r": set range.  (optional) name min max
      requires columns to be named
      include only the columns to be set to limited range
-     all columns not set will be auto-ranged
+     all data not set to a fixed range with this command will be auto-ranged
      multiple column ranges can be listed on the same line
      or with separate "r" commands on separate lines
-     "r   bx   -5   5   by   -5   5"
-"p": 2d pairs.  tab-delimited pairs of x/y names to bind for 2-d plots.
+     example: "r bx -5 5 by -5 5"
+"p": 2d pairs.  (optional) pairs of x/y names to bind for 2-d plots.
      requires columns to be named
      multiple pairs can be listed on the same line
      or with separate "p" commands on separate lines
-     "p   bx   by"
+     example: "p bx by"
      
      
 keyboard commands:
@@ -358,10 +358,9 @@ void serialEvent (Serial myPort) {
   // trim whitespace:
   inString = trim(inString);
   
-  // split on tabs
-  if (!inString.contains("\t")) return;
-  String[] tokens = inString.split("\t");
-  if (tokens.length < 1) return;
+  // split on whitespace
+  String[] tokens = inString.split("\\s+");
+  if (tokens.length < 2) return;
 
   int datalen = tokens.length - 1;
   String[] stringData = new String[datalen];
