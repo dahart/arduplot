@@ -25,6 +25,11 @@ serial commands:
      multiple pairs can be listed on the same line
      or with separate "p" commands on separate lines
      example: "p bx by"
+"c": colors. rgb triplets (0-255)
+     requires columns to be named
+     multiple colors can be listed on the same line
+     or with separate "c" commands on separate lines
+     example: "c ax 255 0 0 bx 0 255 0"
      
      
 keyboard commands:
@@ -50,6 +55,7 @@ public class Column {
   float[] data;
   float x0, x1, y0, y1;
   boolean doAutoRange;
+  int r, g, b;
 
   public Column() {
     name = "";
@@ -60,6 +66,10 @@ public class Column {
     x1 = width;
     y0 = Float.POSITIVE_INFINITY;
     y1 = Float.NEGATIVE_INFINITY;
+    
+    r = 255;
+    g = 255;
+    b = 255;
 
     doAutoRange = true;
   }
@@ -131,7 +141,7 @@ public class Graph {
   //----------------------------------------
   void parseRanges(String[] strData) {
     if ((strData.length % 3) != 0) {
-      println("RANGE: bad format");
+      println("RANGE: bad format.  usage: 'r <name> <min> <max> ...'");
       return;
     }
     for (int i = 0; i < strData.length; i += 3) {
@@ -143,10 +153,11 @@ public class Graph {
             columns[ci].y1 = Float.parseFloat(strData[i+2]);
           } catch (Exception e) {
             // exceptions in parseFloat() lead to Serial failure
+            println(String.format("I had trouble understanding range values for '%s'", strData[i]));
           }
           rangeSet = true;
           columns[ci].doAutoRange = false;
-          println(String.format("range: set '%s' to %s..%s", strData[i], strData[i+1], strData[i+2]));
+          println(String.format("range: set '%s' to %s..%s", strData[i], columns[ci].y0, columns[ci].y1));
           break;
         }
       }
@@ -159,7 +170,7 @@ public class Graph {
   //----------------------------------------
   void parsePairs(String[] strData) {
     if ((strData.length % 2) != 0) {
-      println("PAIRS: bad format");
+      println("PAIRS: bad format.  usage: 'p <name-x> <name-y> ...'");
       return;
     }
     
@@ -188,6 +199,32 @@ public class Graph {
     }
   }
 
+  //----------------------------------------
+  void parseColors(String[] strData) {
+    if ((strData.length % 4) != 0) {
+      println("COLORS: bad format - usage: 'c <name> <red> <green> <blue> ...'");
+      return;
+    }
+    
+    for (int i = 0; i < strData.length; i += 4) {
+      for (int ci = 0; ci < columns.length; ci++) {
+        if (strData[i].equals(columns[ci].name)) {
+          try {
+            columns[ci].r = int(Float.parseFloat(strData[i+1]));
+            columns[ci].g = int(Float.parseFloat(strData[i+2]));
+            columns[ci].b = int(Float.parseFloat(strData[i+3]));
+          } catch (Exception e) {
+            // exceptions in parseFloat() lead to Serial failure
+            println(String.format("I had trouble understanding color values for '%s'", strData[i]));
+          }
+          println(String.format("color: set '%s' to (%s %s %s)", strData[i], columns[ci].r, columns[ci].g, columns[ci].b));
+          
+          break;
+        }
+      }
+    }
+  }
+  
   //----------------------------------------
   void printRange() {
     for (int ci = 0; ci < columns.length; ci++) {
@@ -221,12 +258,12 @@ public class Graph {
       
       // display the column name
       if (drawNames) {
-        fill(32, 220, 32);
+        fill(c.r, c.g, c.b);
         text(c.name, 10, dY1-10);
       }
 
       // plot the data
-      stroke(255);
+      stroke(c.r, c.g, c.b);
       noFill();
       px = 0;
       py = map(c.data[0], c.y0, c.y1, dY0, dY1);
@@ -381,6 +418,9 @@ void serialEvent (Serial myPort) {
       break;
     case 'p':
       graph.parsePairs(stringData);
+      break;
+    case 'c':
+      graph.parseColors(stringData);
       break;
     default:
       println(String.format("unknown command %s", tokens[0]));
