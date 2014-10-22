@@ -263,13 +263,16 @@ public class Graph {
       }
 
       // plot the data
+      // dY[01] are in reverse order intentionally because we want
+      // to see high values on top and low values on the bottom
+      // but our default canvas draws 
       stroke(c.r, c.g, c.b);
       noFill();
       px = 0;
-      py = map(c.data[0], c.y0, c.y1, dY0, dY1);
+      py = map(c.data[0], c.y0, c.y1, dY1, dY0);
       for (int i = 1; i < width; i++) {
         nx = i;
-        ny = map(c.data[i], c.y0, c.y1, dY0, dY1);
+        ny = map(c.data[i], c.y0, c.y1, dY1, dY0);
         line(px, py, nx, ny);
         px = nx;
         py = ny;
