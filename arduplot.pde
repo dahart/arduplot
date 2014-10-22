@@ -331,7 +331,8 @@ void setup () {
     // auto-connect to the usb "serial" port
     // (I'm assuming there's only one -- TODO: make this a choice) 
     if (port.toLowerCase().contains("tty.usbmodem") || // mac
-        (port.toLowerCase().startsWith("com") && port.length() < 6) // windows
+        (port.toLowerCase().startsWith("com") && port.length() < 6) || // window
+        port.toLowerCase().contains("ttyacm") // linux
     ) {
       print("Got it!\n");
       myPort = new Serial(this, port, 115200);
