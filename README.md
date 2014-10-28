@@ -49,5 +49,6 @@ Only the "d" (data) command is required, so for a quick start, just print "d" fo
     "p": toggle pairs.
     "n": toggle names.
     "b": toggle background bars.
+    "a": toggle auto-ranging. (can be used to reset ranges)
     ESC: quit.
 

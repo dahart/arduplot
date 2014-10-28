@@ -37,6 +37,7 @@ keyboard commands:
 "p": toggle pairs.
 "n": toggle names.
 "b": toggle background bars.
+"a": toggle auto-ranging. (can be used to reset ranges).
 ESC: quit.
 
 
@@ -61,17 +62,21 @@ public class Column {
     name = "";
 
     data = new float[width];
-
-    x0 = 0;
-    x1 = width;
-    y0 = Float.POSITIVE_INFINITY;
-    y1 = Float.NEGATIVE_INFINITY;
     
     r = 255;
     g = 255;
     b = 255;
 
     doAutoRange = true;
+    
+    this.resetRange();
+  }
+  
+  public void resetRange() {
+    x0 = 0;
+    x1 = width;
+    y0 = Float.POSITIVE_INFINITY;
+    y1 = Float.NEGATIVE_INFINITY;
   }
 }
 
@@ -234,6 +239,20 @@ public class Graph {
   }
   
   //----------------------------------------
+  void toggleAutoRange() {
+    if (columns.length < 1) return;
+    
+    boolean doAutoRange = !columns[0].doAutoRange;
+    
+    for (int ci = 0; ci < columns.length; ci++) {
+      columns[ci].doAutoRange = doAutoRange;
+      if (doAutoRange) columns[ci].resetRange();
+    }
+    
+    println("ranges " + ((doAutoRange) ? "auto" : "fixed"));
+  }
+  
+  //----------------------------------------
   void draw() {
     noSmooth();
     textAlign(LEFT);
@@ -379,6 +398,10 @@ void keyPressed() {
       
     case 'b':
       graph.drawBGBars = !graph.drawBGBars;
+      break;
+      
+    case 'a':
+      graph.toggleAutoRange();
       break;
   }
 }
